@@ -1,5 +1,5 @@
 # <br/> 크라우드 펀딩 프로젝트 성공요인 분석 및 예측 모델 개발
-###"Crowdfunding Success Factors Analysis and Development of Prediction model for Achievement Rate"
+### "Crowdfunding Success Factors Analysis and Development of Prediction model for Achievement Rate"
 ## "빅데이터 청년인재" 수료 PROJECT (2019. 08. 01 ~ 2019. 08. 24)
 
 ## 1. 빅데이터 청년인재
