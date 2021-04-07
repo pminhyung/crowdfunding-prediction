@@ -1,5 +1,5 @@
 # <br/> 크라우드 펀딩 프로젝트 성공요인 분석 및 예측 모델 개발
-###"Crowdfunding Success Factors Analysis and Development of Prediction model for Achievement Rate"
+### "Crowdfunding Success Factors Analysis and Development of Prediction model for Achievement Rate"
 ## "빅데이터 청년인재" 수료 PROJECT (2019. 08. 01 ~ 2019. 08. 24)
 
 ## 1. 빅데이터 청년인재
@@ -28,7 +28,7 @@ Usage
 - `readability.py` : 가독성 지수 생성
 - `derived_variables.py` : 파생변수 생성
 - `preprocessing.py` : 학습을 위한 데이터 전처리 수행
-- `train.py` : 데이터수집부터 학습까지 전체 과정 수행 
+- `xgb_train.py` : 데이터수집부터 학습까지 전체 과정 수행 
   
 ### 3. Project Presentation
 
