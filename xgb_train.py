@@ -2,10 +2,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 import sklearn.metrics as mt
 from sklearn.model_selection import GridSearchCV
-
-import xgboost
 from xgboost import XGBClassifier
-
 import pandas as pd
 
 from scraping import scrap_wadiz, scrap_navernews
@@ -21,8 +18,8 @@ wadiz = pd.read_excel(wadiz_fname, engine = 'openpyxl')
 df = preprocess_data(wadiz)
 
 
-X = total.drop(['log_count'], axis=1)
-y = total['log_count']
+X = df.drop(['log_count'], axis=1)
+y = df['log_count']
 
 # 학습용/테스트용 데이터 분리
 

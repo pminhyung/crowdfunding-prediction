@@ -1,10 +1,13 @@
+import time
+import requests
 from bs4 import BeautifulSoup
+
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
+
 import openpyxl
-import requests
-import time
+
 
 def get_cat_success_rate():
     """ Print funding success rate by categories in Wadiz through scrapping

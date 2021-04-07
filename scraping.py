@@ -1,10 +1,12 @@
+import time
+import requests
 from bs4 import BeautifulSoup
+
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
+
 import openpyxl
-import requests
-import time
 
 def scrap_wadiz(fname = 'wadiz.xlsx'):
     """ scrap project info in Wadiz
