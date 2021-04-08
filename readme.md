@@ -28,7 +28,10 @@ Usage
 - `readability.py` : 가독성 지수 생성
 - `derived_variables.py` : 파생변수 생성
 - `preprocessing.py` : 학습을 위한 데이터 전처리 수행
-- `xgb_train.py` : 데이터수집부터 학습까지 전체 과정 수행 
+- `xgb_train.py` : 데이터 수집부터 학습까지 전체 과정 수행 (학습모델 저장)
+  
+### 2. run 'test.py'
+- `test.py` : 테스트 데이터에 대해 예측 수행 (자장된 학습모델 사용)
   
 ### 3. Project Presentation
 
