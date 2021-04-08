@@ -83,4 +83,7 @@ def preprocess_data(data:pd.DataFrame) -> pd.DataFrame:
 
     prep_data = data_new[feature_names]
 
-    return prep_data
+    X = prep_data.drop(['log_count'], axis=1)
+    y = prep_data['log_count']
+
+    return prep_data, X, y
