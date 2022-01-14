@@ -1,14 +1,49 @@
-import time
-import requests
-from bs4 import BeautifulSoup
-
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.keys import Keys
-
 import openpyxl
 
-def scrap_wadiz(fname:str = 'wadiz.xlsx') -> str:
+import argparse
+import time
+import re
+from utils import load_yaml
+from typing import Dict
+
+def login_wadiz(driver, wadiz_id:str, wadiz_pw:str):
+    login_link = 'https://www.wadiz.kr/web/waccount/wAccountLogin?returnUrl=https://www.wadiz.kr/web/main'
+    driver.get(login_link)
+    id = driver.find_element_by_css_selector('input#userName')
+    id.send_keys(wadiz_id) # input e-mail
+    pw = driver.find_element_by_css_selector('input#password')
+    pw.send_keys(wadiz_pw) # input password
+    login_btn = driver.find_element_by_css_selector('button#btnLogin')
+    login_btn.click()
+    time.sleep(1.5)
+    return driver
+
+def scroll_to_end(driver):
+    while True:
+        try:
+            target = driver.find_element_by_css_selector('button.ProjectListMoreButton_button__27eTb')
+            actions = ActionChains(driver)
+            actions.move_to_element(target)
+            actions.perform()
+            time.sleep(2)
+        except:
+            break
+    return driver
+
+def check_exists_by_css_selector(driver, css_selector):
+        try:
+            driver.find_element_by_css_selector(css_selector)
+        except:
+            return False
+        return True
+
+def scrap_wadiz(config:Dict[Dict[str:str]]) -> str:
+
+    wadiz_id = config['WADIZ']['wadiz_id']
+    wadiz_pw = config['WADIZ']['wadiz_pw']
+    file_path = config['WADIZ']['wadiz_file_path']
 
     wb = openpyxl.Workbook()
     sheet = wb.active
@@ -19,17 +54,8 @@ def scrap_wadiz(fname:str = 'wadiz.xlsx') -> str:
     driver = webdriver.Chrome('./chromedriver')
 
     # 와디즈 로그인
-    login_link = 'https://www.wadiz.kr/web/waccount/wAccountLogin?returnUrl=https://www.wadiz.kr/web/main'
-    driver.get(login_link)
-    id = driver.find_element_by_css_selector('input#userName')
-    id.send_keys('') # input e-mail
-    pw = driver.find_element_by_css_selector('input#password')
-    pw.send_keys('') # input password
-    login_btn = driver.find_element_by_css_selector('button#btnLogin')
-    login_btn.click()
-
-    time.sleep(1.5)
-
+    driver = login_wadiz(driver, wadiz_id, wadiz_pw)
+    
     # 마감 프로젝트 리스트 페이지 (recent -> old)
     base_link = 'https://www.wadiz.kr/web/wreward/category/308?keyword=&endYn=Y&order=closing'
     driver.get(base_link)
@@ -37,18 +63,8 @@ def scrap_wadiz(fname:str = 'wadiz.xlsx') -> str:
 
     time.sleep(1)
 
-
     # 페이지 마지막까지 스크롤 다운 수행
-    while True:
-        try:
-            target = driver.find_element_by_css_selector('button.ProjectListMoreButton_button__27eTb')
-            actions = ActionChains(driver)
-            actions.move_to_element(target)
-            actions.perform()
-            time.sleep(2)
-        except:
-            break
-
+    driver = scroll_to_end(driver)
 
     # 개별 프로젝트 컨테이너
     projects = driver.find_elements_by_css_selector('div.ProjectCardList_item__1owJa')
@@ -160,7 +176,6 @@ def scrap_wadiz(fname:str = 'wadiz.xlsx') -> str:
             print(video_num)
 
 
-
         # 펀딩 안내 페이지 접속
         funding_info_btn = driver.find_element_by_css_selector('ul.tab-list li:nth-of-type(3) a')
         funding_info_btn.click()
@@ -169,7 +184,7 @@ def scrap_wadiz(fname:str = 'wadiz.xlsx') -> str:
         try:
             delivery_date = driver.find_element_by_css_selector('div#detail-funding-info div.content h3 em').text
         except:
-            deliver_date = 'no info'
+            delivery_date = 'no info'
 
         # 커뮤니티
         community_btn = driver.find_element_by_css_selector('ul.tab-list li:nth-of-type(5) a')
@@ -202,7 +217,6 @@ def scrap_wadiz(fname:str = 'wadiz.xlsx') -> str:
 
         time.sleep(1.5)
 
-
         # (메이커) 프로필 페이지 (new tab)
         maker_profile = driver.find_element_by_css_selector('div.maker-info button')
         maker_profile.click()
@@ -233,9 +247,10 @@ def scrap_wadiz(fname:str = 'wadiz.xlsx') -> str:
             past_success_projects_num = 0
 
 
-        sheet.append([project_url, name, category, maker, percent, money, supporters, likes, summary, goal_amount, new_news, comment_num,\
-                      reward_num, img_num, video_num, delivery_date, sns_followers, wadiz_followers, past_projects_num, \
-                      past_success_projects_num])
+        sheet.append([project_url, name, category, maker, percent, money, supporters, likes, summary, goal_amount, 
+                    new_news, comment_num, reward_num, img_num, video_num, delivery_date, sns_followers, wadiz_followers, 
+                    past_projects_num, past_success_projects_num
+                    ])
 
 
         # 세부 페이지 탭 닫기
@@ -247,25 +262,28 @@ def scrap_wadiz(fname:str = 'wadiz.xlsx') -> str:
 
         count += 1
 
-        fileName = 'Wadiz1{index}{ext}'.format(index=idx, ext='.xlsx')
+        fileName = 'wadiz{index}{ext}'.format(index=idx, ext='.xlsx')
         wb.save(fileName)
         idx += 1
 
+    # 크롬드라이버 종료
     driver.close()
 
-    print('finish scraping')
+    print('Finished Scraping !!!')
 
     # 수집 파일 저장
-    wb.save(fname)
-    return fname
+    wb.save(file_path)
+    return file_path
 
-def scrap_navernews(keyword: str = '크라우드펀딩'):
-    """ scrap naver news with specific keyword
+def scrap_navernews(config:Dict[Dict[str:str]]) -> str:
+    """[summary]
+    키워드(쿼리) 검색결과에 해당되는 네이버 뉴스 수집
 
-    Keyword arguments:
-    keyword -- search keyword in naver news
+    Args:
+        config (Dict[Dict[str): 뉴스기사 수집범위에 해당하는 시작일자, 종료일자, 키워드, 저장파일경로에 대한 key-value 가진 Dict
 
-    return : saved filename (.xlsx)
+    Returns:
+        str: 저장된 파일경로 return
     """
 
     wb = openpyxl.Workbook()
@@ -273,40 +291,37 @@ def scrap_navernews(keyword: str = '크라우드펀딩'):
 
     sheet.append(['키워드', '날짜', '기사제목'])
 
-    keyword = '크라우드펀딩'
+    start_date = config['NEWS']['start_date']    # 시작일자
+    end_date = config['NEWS']['end_date']        # 종료일자
+    keyword = config['NEWS']['news_keyword']     # 검색 쿼리(키워드)
+    file_path = config['NEWS']['news_file_path'] # 저장 파일 경로
+    max_num = config['NEWS']['max_num']          # 최대 기사 개수
 
-    # headless chromedriver
+    # headless 크롬드라이버 실행
     options = webdriver.ChromeOptions()
     options.add_argument('headless')
-
     driver = webdriver.Chrome('./chromedriver', options=options)
 
-    # max_num of articles scrapped
-    max = 3999
-
-    def check_exists_by_css_selector(css_selector):
-        try:
-            driver.find_element_by_css_selector(css_selector)
-        except:
-            return False
-        return True
-
-    for n in range(1, max, 10):
-        driver.get('https://search.naver.com/search.naver?&where=news&query=크라우드펀딩&sm=tab_pge&sort=1&photo=0&field=0&reporter_article=&pd=3&ds=2019.06.01&de=2019.08.14&docid=&nso=so:dd,p:from20190601to20190814,a:all&mynews=0&start='+str(n)+'&refresh_start=0')
+    # 페이지별 뉴스기사 수집 (1페이지당 10개)
+    for n in range(1, max_num, 10):
+        driver.get(f'https://search.naver.com/search.naver?&where=news&query={keyword}&sm=tab_pge&sort=1&photo=0&field=0&reporter_article=&pd=3&ds={start_date}&de={end_date}&docid=&nso=so:dd,p:from20190601to20190814,a:all&mynews=0&start='+str(n)+'&refresh_start=0')
         articles = driver.find_elements_by_css_selector('ul.type01>li')
 
         for a in articles:
-            # title
+
+            # 제목
             title = a.find_element_by_css_selector("a._sp_each_title").text
-            # date
+
+            # 날짜
             date = a.find_element_by_css_selector("dd.txt_inline").text
 
             print(title)
             sheet.append([keyword, date, title])
 
-            # similar articles
-            if check_exists_by_css_selector('ul.type01>li dl dd:nth-of-type(3)') == True:
-                # see more button
+            # 연관 기사 존재
+            if check_exists_by_css_selector(driver, 'ul.type01>li dl dd:nth-of-type(3)') == True:
+
+                # 연관기사 다수 - "더보기" 클릭 후 연관기사 제목 수집
                 try:
                     more_button = a.find_element_by_css_selector('ul.type01>li div.newr_more').text
                     num_of_more_articles = re.search(r'(\d+)', more_button)
@@ -314,7 +329,7 @@ def scrap_navernews(keyword: str = '크라우드펀딩'):
                         sheet.append([keyword, date, '[연관기사]'+title])
                         print('similar articles')
 
-                # few similar articles
+                # 연관기사 소수 - 연관기사 제목 수집
                 except:
                     related_articles = a.find_elements_by_css_selector('ul.type01>li ul.relation_lst li')
                     for r in related_articles:
@@ -324,26 +339,48 @@ def scrap_navernews(keyword: str = '크라우드펀딩'):
                         print(related_articles_title)
                         sheet.append([keyword, related_articles_date, related_articles_title])
 
-    print('finish scrapping!')
-    fname = "navernews_{}.xlsx".format(keyword)
-    wb.save(fname)
-    return fname
+    print('Finished Scraping !!!')
 
-def main(to_scrap:str) -> str:
-    if to_scrap == 'wadiz':
-        saved_fname = scrap_wadiz()
-    elif to_scrap == 'navernews':
-        saved_fname = scrap_navernews()
-    return saved_fname
+    # 수집 파일 저장
+    wb.save(file_path)
+    return file_path
 
+def main(args:Dict) -> str:
+    """[summary]
+    목적에 따른 크롤링 함수 실행
 
-if __name__ == '__main__':
+    Args:
+        args (Dict): to_scrap 속성값이 'wadiz'인 경우 wadiz 크롤링 수행,
+                     'navernews' 인 경우 news 크롤링 수행,
+                     'all' 인 경우 모두 수행
+
+    Returns:
+        str: 저장된 파일경로 return, 'all'인 경우 두개를 합친 하나의 문자열 출력
+    """
+    config = load_yaml('scraping_config.yaml')
 
     # wadiz 프로젝트 정보 수집
-    to_scrap = 'wadiz'
+    if args.to_scrap == 'wadiz':
+        saved_fname = scrap_wadiz(config)
 
-    # '크라우드 펀딩' 검색 결과 네이버 뉴스 수집
-    #to_scrap = 'navernews'
+    # '크라우드 펀딩' 검색 결과 관련 네이버 뉴스 수집
+    elif args.to_scrap == 'navernews':
+        saved_fname = scrap_navernews(config)
 
+    # wadiz, navernews 수집 모두 수행
+    elif args.to_scrap == 'all':
+        saved_fname1 = scrap_wadiz(config)
+        saved_fname2 = scrap_navernews(config)
+        saved_fname = saved_fname1 + ', ' + saved_fname2
+
+    return saved_fname
+
+if __name__ == '__main__':
     
-    main(to_scrap)
+    # 실행 대상 함수 input
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--to_scrap', help="input 'wadiz' or 'navernews' or 'all'", type=str, default='wadiz')
+    args = parser.parse_args()
+
+    # 함수 실행
+    main(args)
