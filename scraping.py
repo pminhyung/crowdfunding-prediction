@@ -8,14 +8,8 @@ from selenium.webdriver.common.keys import Keys
 
 import openpyxl
 
-def scrap_wadiz(fname = 'wadiz.xlsx'):
-    """ scrap project info in Wadiz
+def scrap_wadiz(fname:str = 'wadiz.xlsx') -> str:
 
-    Keyword arguments:
-    fname -- file name to save (xlsx)
-
-    return : saved filename (.xlsx)
-    """
     wb = openpyxl.Workbook()
     sheet = wb.active
 
@@ -24,7 +18,7 @@ def scrap_wadiz(fname = 'wadiz.xlsx'):
 
     driver = webdriver.Chrome('./chromedriver')
 
-    # login
+    # 와디즈 로그인
     login_link = 'https://www.wadiz.kr/web/waccount/wAccountLogin?returnUrl=https://www.wadiz.kr/web/main'
     driver.get(login_link)
     id = driver.find_element_by_css_selector('input#userName')
@@ -36,7 +30,7 @@ def scrap_wadiz(fname = 'wadiz.xlsx'):
 
     time.sleep(1.5)
 
-    # project lists (recent -> old)
+    # 마감 프로젝트 리스트 페이지 (recent -> old)
     base_link = 'https://www.wadiz.kr/web/wreward/category/308?keyword=&endYn=Y&order=closing'
     driver.get(base_link)
     driver.maximize_window()
@@ -44,7 +38,7 @@ def scrap_wadiz(fname = 'wadiz.xlsx'):
     time.sleep(1)
 
 
-    # scroll down
+    # 페이지 마지막까지 스크롤 다운 수행
     while True:
         try:
             target = driver.find_element_by_css_selector('button.ProjectListMoreButton_button__27eTb')
@@ -56,12 +50,13 @@ def scrap_wadiz(fname = 'wadiz.xlsx'):
             break
 
 
-    # container of projects
+    # 개별 프로젝트 컨테이너
     projects = driver.find_elements_by_css_selector('div.ProjectCardList_item__1owJa')
 
     count = 1
     idx = 0
 
+    # 전체 목록에서 정보 수집
     for p in projects:
 
         print(count)
@@ -96,67 +91,67 @@ def scrap_wadiz(fname = 'wadiz.xlsx'):
         print(name)
 
 
-        # project main page (new tab)
+        # 새 탭으로 프로젝트 세부 페이지 접속 (new tab)
         project_url = image.get_attribute('href')
 
         driver.execute_script("window.open('');")
         time.sleep(1.5)
 
 
-        # move focus in chrome (new tab)
+        # 해당 탭으로 포커싱 이동 (new tab)
         driver.switch_to.window(driver.window_handles[1])
         driver.get(project_url)
         time.sleep(1.5)
 
-        # supporters-num
+        # 서포터 수
         try:
             supporters = driver.find_element_by_css_selector('p.total-supporter strong').text
         except:
             supporters = 0
 
-        # likes
+        # 좋아요 수
         try:
             likes = driver.find_element_by_css_selector('em.cnt-like').text
         except:
             likes = 0
 
-        # summary text
+        # 요약글 문장
         try:
             summary = driver.find_element_by_css_selector('div.campaign-summary').text
         except:
             summary = 'None'
 
-        # amount of funding and period
+        # 펀딩금액, 펀딩기간
         try:
             goal_amount = driver.find_element_by_css_selector('div.wd-ui-campaign-content > div > div:nth-child(4) p').text
         except:
             goal_amount = 'no info'
 
-        # updated-postings-num
+        # 새소식 포스팅 개수
         try:
             new_news = driver.find_element_by_css_selector('ul.tab-list li:nth-of-type(4) span').text
         except:
             new_news = 0
 
-        # comments-num (community-posting-nums)
+        # 새소식 포스팅 내 댓글 개수
         try:
             comment_num = driver.find_element_by_css_selector('ul.tab-list li:nth-of-type(5) span').text
         except:
             comment_num = 0
 
-        # rewards-num
+        # 리워드 상품 종류 개수
         try:
             reward_num = len(driver.find_elements_by_css_selector('button.rightinfo-reward-list'))
         except:
             reward_num = 0
 
-        # intro image-num
+        # 소개글 이미지 개수
         try:
             img_num = len(driver.find_elements_by_css_selector('div.inner-contents.fr-view img'))
         except:
             img_num = 0
 
-        # intro video-num
+        # 소개글 비디오 개수
         try:
             video_num = len(driver.find_elements_by_css_selector('span.fr-video.fr-fvc.fr-dvb.fr-draggable'))
             print(video_num)
@@ -166,23 +161,21 @@ def scrap_wadiz(fname = 'wadiz.xlsx'):
 
 
 
-        # main page of funding
+        # 펀딩 안내 페이지 접속
         funding_info_btn = driver.find_element_by_css_selector('ul.tab-list li:nth-of-type(3) a')
         funding_info_btn.click()
 
-        # start date of delievery
+        # 리워드 발송 시작일
         try:
             delivery_date = driver.find_element_by_css_selector('div#detail-funding-info div.content h3 em').text
         except:
             deliver_date = 'no info'
 
-        # community
+        # 커뮤니티
         community_btn = driver.find_element_by_css_selector('ul.tab-list li:nth-of-type(5) a')
         community_btn.click()
 
-        # comments (X)
-
-        # Instagram (new tab)
+        # 인스타그램 정보 수집 (new tab)
         try:
             instagram = driver.find_element_by_css_selector('ul.social a.instagram')
             instagram_url = instagram.get_attribute('href')
@@ -194,10 +187,10 @@ def scrap_wadiz(fname = 'wadiz.xlsx'):
             driver.get(instagram_url)
             time.sleep(1.5)
             try:
-                # follower-num (Instagram)
+                # 팔로워 수 (Instagram)
                 sns_followers = driver.find_element_by_css_selector('ul.k9GMp  li:nth-of-type(2)  span.g47SY').text
             except:
-                # profile deleted, link error
+                # 프로필 페이지 미존재 시 예외처리
                 sns_followers = 'link error'
 
             driver.close()
@@ -210,25 +203,25 @@ def scrap_wadiz(fname = 'wadiz.xlsx'):
         time.sleep(1.5)
 
 
-        # maker profile page (new tab)
+        # (메이커) 프로필 페이지 (new tab)
         maker_profile = driver.find_element_by_css_selector('div.maker-info button')
         maker_profile.click()
 
         time.sleep(1.5)
 
-        # follower-num in wadiz
+        # (메이커) 와디즈 내 팔로워 수
         try:
             wadiz_followers = driver.find_element_by_css_selector('ul.activity-list li:nth-of-type(3) strong').text
         except:
             wadiz_followers = 0
 
-        # reward project-num in the past
+        # (메이커) 과거 리워드 프로젝트 수
         try:
             past_projects_num = len(driver.find_elements_by_css_selector('li.all em.project-type.reward'))-1
         except:
             past_projects_num = 0
 
-        # succeeded project-num so far
+        # (메이커) 펀딩 성공 프로젝트 수
         try:
             past_projects = driver.find_elements_by_css_selector('li.all span.percent')
             n = 0
@@ -245,11 +238,11 @@ def scrap_wadiz(fname = 'wadiz.xlsx'):
                       past_success_projects_num])
 
 
-        # close detail-page tab
+        # 세부 페이지 탭 닫기
         driver.close()
         time.sleep(1.5)
 
-        # back to initial tab
+        # 원래 탭(전체 목록 페이지)로 돌아가기 이동
         driver.switch_to.window(driver.window_handles[0])
 
         count += 1
@@ -262,6 +255,7 @@ def scrap_wadiz(fname = 'wadiz.xlsx'):
 
     print('finish scraping')
 
+    # 수집 파일 저장
     wb.save(fname)
     return fname
 
@@ -334,3 +328,22 @@ def scrap_navernews(keyword: str = '크라우드펀딩'):
     fname = "navernews_{}.xlsx".format(keyword)
     wb.save(fname)
     return fname
+
+def main(to_scrap:str) -> str:
+    if to_scrap == 'wadiz':
+        saved_fname = scrap_wadiz()
+    elif to_scrap == 'navernews':
+        saved_fname = scrap_navernews()
+    return saved_fname
+
+
+if __name__ == '__main__':
+
+    # wadiz 프로젝트 정보 수집
+    to_scrap = 'wadiz'
+
+    # '크라우드 펀딩' 검색 결과 네이버 뉴스 수집
+    #to_scrap = 'navernews'
+
+    
+    main(to_scrap)
