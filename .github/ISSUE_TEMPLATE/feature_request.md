@@ -1,7 +1,7 @@
 ---
 name: Feature request
 about: Suggest an idea for this project
-title: '[FR] TITLE
+title: '[FR] TITLE'
 labels: enhancement
 assignees: pminhyung
 
