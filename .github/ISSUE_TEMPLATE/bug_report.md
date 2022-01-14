@@ -1,3 +1,12 @@
+---
+name: Bug report
+about: Create a report to help us improve
+title: '[BUG] "Title"'
+labels: bug
+assignees: pminhyung
+
+---
+
 # Title: 
   ex. [BUG] 특정 속성에 대해 중요도 100%로 유사검색 결과 생성
   
