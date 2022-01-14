@@ -1,7 +1,7 @@
 ---
 name: Feature request
 about: Suggest an idea for this project
-title: '[FR] "Title"'
+title: '[FR] TITLE
 labels: enhancement
 assignees: pminhyung
 
@@ -15,7 +15,7 @@ assignees: pminhyung
   
 ### [AS-IS]
 "해당 이슈 관련 현재 소스 실행 과정 및 결과 기술"
-ex. single, multi value를 가지는 속성들을 미리 정의하여 속성명에 따른 전처리 수행
+ex. single, multi value를 가지는 속성명을 각각 미리 정의하여 속성명에 따른 전처리 수행
   
 ### [TO-BE]
 "변경 후 기대되는 소스 실행 과정 및 결과 기술"
