@@ -1,13 +1,11 @@
 import time
-import requests
-from bs4 import BeautifulSoup
+import yaml
 
 from selenium import webdriver
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.keys import Keys
 
-import openpyxl
-
+def load_yaml(filename:str):
+    with open(filename, 'r') as f:
+        return yaml.load(f, Loader=yaml.FullLoader)
 
 def get_cat_success_rate():
     """ Print funding success rate by categories in Wadiz through scrapping
