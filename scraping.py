@@ -1,4 +1,4 @@
-from selenium import webdriver
+from selenium.webdriver import Chrome, ChromeOptions
 from selenium.webdriver.common.action_chains import ActionChains
 import openpyxl
 
@@ -8,19 +8,41 @@ import re
 from utils import load_yaml
 from typing import Dict
 
-def login_wadiz(driver, wadiz_id:str, wadiz_pw:str):
+def login_wadiz(driver: Chrome, wadiz_id:str, wadiz_pw:str) -> Chrome:
+    """
+    [summary]
+    와디즈(wadiz) 로그인 페이지 접속 및 로그인 수행
+
+    [Args]:
+        driver (Chrome): 실행중인 크롬 드라이버
+        wadiz_id (str): wadiz 페이지의 개인 ID
+        wadiz_pw (str): wadiz 페이지의 개인 Password
+
+    [Returns]:
+        Chrome: 실행중인 크롬 드라이버
+    """
     login_link = 'https://www.wadiz.kr/web/waccount/wAccountLogin?returnUrl=https://www.wadiz.kr/web/main'
     driver.get(login_link)
-    id = driver.find_element_by_css_selector('input#userName')
-    id.send_keys(wadiz_id) # input e-mail
-    pw = driver.find_element_by_css_selector('input#password')
-    pw.send_keys(wadiz_pw) # input password
+    id_section = driver.find_element_by_css_selector('input#userName')
+    id_section.send_keys(wadiz_id) # input e-mail
+    pw_section = driver.find_element_by_css_selector('input#password')
+    pw_section.send_keys(wadiz_pw) # input password
     login_btn = driver.find_element_by_css_selector('button#btnLogin')
     login_btn.click()
     time.sleep(1.5)
     return driver
 
-def scroll_to_end(driver):
+def scroll_to_end(driver:Chrome) -> Chrome:
+    """
+    [summary]
+    와디즈(wadiz) 내 리워드 프로젝트 목록 페이지에서 무한 스크롤 다운 수행
+
+    [Args]:
+        driver (Chrome): 실행중인 크롬 드라이버
+
+    [Returns]:
+        Chrome: 실행중인 크롬 드라이버
+    """
     while True:
         try:
             target = driver.find_element_by_css_selector('button.ProjectListMoreButton_button__27eTb')
@@ -32,15 +54,41 @@ def scroll_to_end(driver):
             break
     return driver
 
-def check_exists_by_css_selector(driver, css_selector):
-        try:
-            driver.find_element_by_css_selector(css_selector)
-        except:
-            return False
-        return True
+def check_exists_by_css_selector(driver:Chrome, css_selector:str) -> bool:
+    """
+    [summary]
+    특정 css_selector가 존재여부 check
+
+    [Args]:
+        driver (Chrome): 실행중인 크롬 드라이버
+        css_selector (str): 존재여부를 check할 css_selector
+
+    [Returns]:
+        bool: css_selector 존재여부
+    """
+    try:
+        driver.find_element_by_css_selector(css_selector)
+    except:
+        return False
+    return True
 
 def scrap_wadiz(config:Dict[Dict[str:str]]) -> str:
+    """
+    [summary]
+    '와디즈 홈페이지 내 리워드형 프로젝트 데이터 수집'
 
+    [프로젝트 수집 범위] : 마감된 리워드형 프로젝트 전체 (최근에서 오래된 순)
+
+    [수집 변수] :
+    'url', '제목', '카테고리', '메이커', '달성률', '달성액', '서포터수', '좋아요수', '요약글', '목표금액과기간', '글업데이트수', '댓글수', \
+    '리워드종류수', '이미지수', '비디오수', '배송시작날짜', '인스타팔로워수', '와디즈팔로워수', '과거프로젝트수', '과거성공프로젝트수'
+
+    [Args]:
+        fname (str): 저장파일경로, Defaults to 'wadiz.xlsx'.
+
+    [Returns]:
+        str: 저장파일경로
+    """
     wadiz_id = config['WADIZ']['wadiz_id']
     wadiz_pw = config['WADIZ']['wadiz_pw']
     file_path = config['WADIZ']['wadiz_file_path']
@@ -51,7 +99,7 @@ def scrap_wadiz(config:Dict[Dict[str:str]]) -> str:
     sheet.append(['url', '제목', '카테고리', '메이커', '달성률', '달성액', '서포터수', '좋아요수', '요약글', '목표금액과기간', '글업데이트수', '댓글수', \
                   '리워드종류수', '이미지수', '비디오수', '배송시작날짜', '인스타팔로워수', '와디즈팔로워수', '과거프로젝트수', '과거성공프로젝트수'])
 
-    driver = webdriver.Chrome('./chromedriver')
+    driver = Chrome('./chromedriver')
 
     # 와디즈 로그인
     driver = login_wadiz(driver, wadiz_id, wadiz_pw)
@@ -298,9 +346,9 @@ def scrap_navernews(config:Dict[Dict[str:str]]) -> str:
     max_num = config['NEWS']['max_num']          # 최대 기사 개수
 
     # headless 크롬드라이버 실행
-    options = webdriver.ChromeOptions()
+    options = ChromeOptions()
     options.add_argument('headless')
-    driver = webdriver.Chrome('./chromedriver', options=options)
+    driver = Chrome('./chromedriver', options=options)
 
     # 페이지별 뉴스기사 수집 (1페이지당 10개)
     for n in range(1, max_num, 10):
