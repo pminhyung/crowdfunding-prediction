@@ -4,6 +4,17 @@ import pandas as pd
 from readability import get_readability
 
 def gen_variables(data):
+
+    """
+    [summary]
+
+    [Args]:
+        data ([type]): [description]
+
+    [Returns]:
+        [type]: [description]
+    """
+    
     # 5개 필요변수 추가
     fund_amt = []  # 목표금액
     start_dt = []  # 펀딩시작날짜
@@ -34,6 +45,7 @@ def gen_variables(data):
         result = twoDatetime - oneDatetime
         fin_dlv_term.append(result.days)
 
+    # dataframe에 추가
     data['목표금액'] = fund_amt
     data['펀딩시작날짜'] = start_dt
     data['펀딩마감날짜'] = fin_dt

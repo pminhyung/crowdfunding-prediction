@@ -72,26 +72,29 @@ def check_exists_by_css_selector(driver:Chrome, css_selector:str) -> bool:
         return False
     return True
 
-def scrap_wadiz(config:Dict[Dict[str:str]]) -> str:
+def scrap_wadiz(config:Dict[Dict]) -> str:
+
     """
     [summary]
-    '와디즈 홈페이지 내 리워드형 프로젝트 데이터 수집'
+        '와디즈 홈페이지 내 리워드형 프로젝트 데이터 수집'
 
-    [프로젝트 수집 범위] : 마감된 리워드형 프로젝트 전체 (최근에서 오래된 순)
+    [프로젝트 수집 범위] : 
+        마감된 리워드형 프로젝트 전체 (최근에서 오래된 순)
 
     [수집 변수] :
-    'url', '제목', '카테고리', '메이커', '달성률', '달성액', '서포터수', '좋아요수', '요약글', '목표금액과기간', '글업데이트수', '댓글수', \
-    '리워드종류수', '이미지수', '비디오수', '배송시작날짜', '인스타팔로워수', '와디즈팔로워수', '과거프로젝트수', '과거성공프로젝트수'
+        'url', '제목', '카테고리', '메이커', '달성률', '달성액', '서포터수', '좋아요수', '요약글', '목표금액과기간', '글업데이트수', '댓글수', \
+        '리워드종류수', '이미지수', '비디오수', '배송시작날짜', '인스타팔로워수', '와디즈팔로워수', '과거프로젝트수', '과거성공프로젝트수'
 
     [Args]:
-        fname (str): 저장파일경로, Defaults to 'wadiz.xlsx'.
+        config (Dict[Dict[str]]): 뉴스기사 수집범위에 해당하는 시작일자, 종료일자, 키워드, 저장파일경로에 대한 key-value 가진 Dict
 
     [Returns]:
         str: 저장파일경로
     """
-    wadiz_id = config['WADIZ']['wadiz_id']
-    wadiz_pw = config['WADIZ']['wadiz_pw']
-    file_path = config['WADIZ']['wadiz_file_path']
+
+    wadiz_id:str = config['WADIZ']['wadiz_id']
+    wadiz_pw:str = config['WADIZ']['wadiz_pw']
+    file_path:str = config['WADIZ']['wadiz_file_path']
 
     wb = openpyxl.Workbook()
     sheet = wb.active
@@ -324,13 +327,14 @@ def scrap_wadiz(config:Dict[Dict[str:str]]) -> str:
     return file_path
 
 def scrap_navernews(config:Dict[Dict[str:str]]) -> str:
+
     """[summary]
     키워드(쿼리) 검색결과에 해당되는 네이버 뉴스 수집
 
-    Args:
-        config (Dict[Dict[str): 뉴스기사 수집범위에 해당하는 시작일자, 종료일자, 키워드, 저장파일경로에 대한 key-value 가진 Dict
+    [Args]:
+        config (Dict[Dict]): 뉴스기사 수집범위에 해당하는 시작일자, 종료일자, 키워드, 저장파일경로에 대한 key-value 가진 Dict
 
-    Returns:
+    [Returns]:
         str: 저장된 파일경로 return
     """
 
@@ -339,11 +343,11 @@ def scrap_navernews(config:Dict[Dict[str:str]]) -> str:
 
     sheet.append(['키워드', '날짜', '기사제목'])
 
-    start_date = config['NEWS']['start_date']    # 시작일자
-    end_date = config['NEWS']['end_date']        # 종료일자
-    keyword = config['NEWS']['news_keyword']     # 검색 쿼리(키워드)
-    file_path = config['NEWS']['news_file_path'] # 저장 파일 경로
-    max_num = config['NEWS']['max_num']          # 최대 기사 개수
+    start_date:str = config['NEWS']['start_date']    # 시작일자
+    end_date:str = config['NEWS']['end_date']        # 종료일자
+    keyword:str = config['NEWS']['news_keyword']     # 검색 쿼리(키워드)
+    file_path:str = config['NEWS']['news_file_path'] # 저장 파일 경로
+    max_num:int = config['NEWS']['max_num']          # 최대 기사 개수
 
     # headless 크롬드라이버 실행
     options = ChromeOptions()
@@ -394,8 +398,9 @@ def scrap_navernews(config:Dict[Dict[str:str]]) -> str:
     return file_path
 
 def main(args:Dict) -> str:
+
     """[summary]
-    목적에 따른 크롤링 함수 실행
+        목적에 따른 크롤링 함수 실행
 
     Args:
         args (Dict): to_scrap 속성값이 'wadiz'인 경우 wadiz 크롤링 수행,
@@ -405,7 +410,8 @@ def main(args:Dict) -> str:
     Returns:
         str: 저장된 파일경로 return, 'all'인 경우 두개를 합친 하나의 문자열 출력
     """
-    config = load_yaml('scraping_config.yaml')
+    
+    config = load_yaml('config.yaml')
 
     # wadiz 프로젝트 정보 수집
     if args.to_scrap == 'wadiz':

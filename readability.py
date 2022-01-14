@@ -1,9 +1,23 @@
 import re
+from typing import List, Tuple
 from urllib.request import urlopen
+
+import pandas as pd
 from bs4 import BeautifulSoup
 from konlpy.tag import Okt
 
-def make_html_list(project_url):
+def make_html_list(project_url: str) -> List:
+    
+    """
+    [summary]
+
+    [Args]:
+        project_url (str): [description]
+
+    [Returns]:
+        List: [description]
+    """
+
     html_list = []
     for i in project_url:
         html = urlopen(i)
@@ -11,7 +25,18 @@ def make_html_list(project_url):
         html_list.append(bsObject)
     return html_list
 
-def cleaning_text(raw_html):
+def cleaning_text(raw_html:str) -> str:
+    
+    """
+    [summary]
+
+    [Args]:
+        raw_html (str): [description]
+
+    [Returns]:
+        str: [description]
+    """
+
     str_text = str(raw_html)
     str_text = re.sub(r'<[^>]*>','',str_text)
     str_text = re.sub(r'(\xa0|\n)','',str_text)
@@ -20,13 +45,35 @@ def cleaning_text(raw_html):
                           '', cleaned_text)
     return cleaned_text
 
-def count_sentence(cleaned_text):
+def count_sentence(cleaned_text:str) -> Tuple[List, int]:
+    
+    """
+    [summary]
+
+    [Args]:
+        cleaned_text (str): [description]
+
+    [Returns]:
+        Tuple[List, int]: [description]
+    """
+
     text_fin =  re.split(r'(\.|\!|\?|\:)',cleaned_text)
     cleaned_list = [x for x in text_fin if len(x) >4]
     return cleaned_list, len(cleaned_list)
 
 
-def syllables_count(clean_text):
+def syllables_count(clean_text:str) -> int:
+    
+    """
+    [summary]
+
+    [Args]:
+        clean_text (str): [description]
+
+    [Returns]:
+        int: [description]
+    """
+
     # 특수문자 완전제거
     clean_text2 = re.sub('[\{\}\[\]\/,;|\).!:?(\'\"]', '', clean_text)
 
@@ -40,18 +87,35 @@ def syllables_count(clean_text):
     len_syllables = len(clean_text2)
     return len_syllables
 
-def readabilty_score(len_sentences, len_words, len_syllables):
+def readabilty_score(len_sentences:int, len_words:int, len_syllables:int) -> float:
+
+    """
+    [summary]
+
+    [Args]:
+        len_sentences (int): [description]
+        len_words (int): [description]
+        len_syllables (int): [description]
+
+    [Returns]:
+        float: [description]
+    """
+
     score = 206.835 - 1.015*(len_words/len_sentences) - 84.6*(len_syllables/len_words)
     return score
 
-def get_readability(data):
-    """ calculate readability score from input data
+def get_readability(data:pd.Series) -> List:
+    """
+    [summary]
+        calculate readability score from input data
 
-        Keyword arguments:
-        fname -- data (DataFrame)
+    Args:
+        data (pd.Series): [description]
 
-        return : list
-        """
+    Returns:
+        List: [description]
+    """
+
     urls = data['url']
     html_list = make_html_list(urls)
 

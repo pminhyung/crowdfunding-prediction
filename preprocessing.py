@@ -1,22 +1,45 @@
-import datetime
 import pandas as pd
-import numpy as np
-import openpyxl
 from derived_variables import gen_variables
 
+def prep_insta_follower_num(x:int) -> int:
+    """
+    [summary]
+
+    [Args]:
+        x (int): [description]
+
+    [Returns]:
+        int: [description]
+    """
+    x = str(x)
+    x = x.replace(',', '') if '천' not in x else x
+    x = x.replace('천', '')
+    x = float(x)*1000 if '.' in x else int(x)
+    x = int(x)
+    return x
+
 def preprocess_data(data:pd.DataFrame) -> pd.DataFrame:
-    """ preprocess data before training
 
-        Keyword arguments:
-        data -- raw data (dataframe)
+    """
+    [summary]
+        Wadiz 수집 데이터에 대해 파생변수 생성 및 전처리 수행
+    
+    [Args]:
+        data (pd.DataFrame): 수집된 Wadiz raw data의 데이터프레임
 
-        return : dataframe
-        """
+    [Returns]:
+        pd.DataFrame: 전처리 및 파생변수 추가된 데이터프레임 return
+    """
 
     data = gen_variables(data)
 
-    # 펀딩기간 정수 변환
-    data['펀딩기간'] = data.펀딩기간.dt.days
+    # 날짜 데이터들 datatime 데이터로 변환
+    data['펀딩시작날짜'] = pd.to_datetime(data['펀딩시작날짜'])
+    data['펀딩마감날짜'] = pd.to_datetime(data['펀딩마감날짜'])
+    data['배송시작날짜'] = pd.to_datetime(data['배송시작날짜'])
+
+    # 펀딩기간 datetime to int
+    data['펀딩기간'] = data['펀딩기간'].dt.days
 
     # 과거 프로젝트 수 컬럼에서 -1값들을 0으로 변경
     data['과거프로젝트수'] = data['과거프로젝트수'].apply(lambda x: 0 if x == -1 else x)
@@ -29,12 +52,16 @@ def preprocess_data(data:pd.DataFrame) -> pd.DataFrame:
     # 위의결과 -1이 되어버린 값들을 0으로 변경
     data['과거성공프로젝트수'] = data['과거성공프로젝트수'].apply(lambda x: 0 if x == -1 else x)
 
-    # 종속변수 log transformation
-    # data["log_count"] = np.log(data["달성률"] + 1)
+    # 인스타그램팔로워수 - 표기 변환
+    data['인스타팔로워수'] = data['인스타팔로워수'].apply(prep_insta_follower_num)
+
+    # 달성액, 서포터수 - str to int 변환
+    data['달성액'] = data['달성액'].apply(lambda x: int(x.replace('원', '')))
+    data['서포터수'] = data['서포터수'].apply(lambda x: int(x.replace(',', '')))
 
     data = data.drop(columns=['목표금액과기간', '달성률'], axis=1)
 
-    # 펀딩시작요일 원핫인코딩
+    # 펀딩시작요일 - One Hot Encoding
     data_new = pd.concat([data, pd.get_dummies(data['펀딩시작요일'])], axis=1)
 
     feature_names = ['log_count',  # 정답값
@@ -57,7 +84,6 @@ def preprocess_data(data:pd.DataFrame) -> pd.DataFrame:
                      '가독성2',
                      '제목단어수',
                      '펀딩성공여부',
-                     # '카테고리',
                      '디자인소품',
                      '반려동물',
                      '뷰티',
@@ -74,7 +100,6 @@ def preprocess_data(data:pd.DataFrame) -> pd.DataFrame:
                      'Thu',
                      'Tue',
                      'Wed',
-                     # '성공비율',
                      '펀딩기간',
                      '일펀딩금액',
                      '일글수',

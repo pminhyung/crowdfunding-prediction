@@ -1,0 +1,28 @@
+SEED: 42
+
+WADIZ:
+  wadiz_id: USER_ID
+  wadiz_pw: PASSWORD
+  wadiz_file_path: wadiz.xlsx
+
+NEWS:
+  start_date: '2019.06.01'
+  end_date: '2019.08.14'
+  news_keyword: '크라우드펀딩'
+  news_file_path: navernews_크라우드펀딩.xlsx
+  max_num: 3999
+
+TRAIN:
+  save_model: True
+  wadiz_file_path: wadiz.xlsx
+  test_size: 0.2
+  parent_dirname: ./models
+  model_file_name: xgb.dat
+
+HYPERPARAMETERS:
+  n_estimators: [100,200]
+  learning_rate: [0.1,0.2]
+
+TEST:
+  test_data_path: wadiz_test.xlsx
+  test_result_path: ./test_predictions.xlsx
