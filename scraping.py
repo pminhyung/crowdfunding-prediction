@@ -11,7 +11,7 @@ from typing import Dict
 def login_wadiz(driver: Chrome, wadiz_id:str, wadiz_pw:str) -> Chrome:
     """
     [summary]
-    와디즈(wadiz) 로그인 페이지 접속 및 로그인 수행
+        와디즈(wadiz) 로그인 페이지 접속 및 로그인 수행
 
     [Args]:
         driver (Chrome): 실행중인 크롬 드라이버
@@ -35,7 +35,7 @@ def login_wadiz(driver: Chrome, wadiz_id:str, wadiz_pw:str) -> Chrome:
 def scroll_to_end(driver:Chrome) -> Chrome:
     """
     [summary]
-    와디즈(wadiz) 내 리워드 프로젝트 목록 페이지에서 무한 스크롤 다운 수행
+        와디즈(wadiz) 내 리워드 프로젝트 목록 페이지에서 무한 스크롤 다운 수행
 
     [Args]:
         driver (Chrome): 실행중인 크롬 드라이버
@@ -57,7 +57,7 @@ def scroll_to_end(driver:Chrome) -> Chrome:
 def check_exists_by_css_selector(driver:Chrome, css_selector:str) -> bool:
     """
     [summary]
-    특정 css_selector가 존재여부 check
+        특정 css_selector가 존재여부 check
 
     [Args]:
         driver (Chrome): 실행중인 크롬 드라이버
@@ -130,26 +130,31 @@ def scrap_wadiz(config:Dict[Dict]) -> str:
 
         image = p.find_element_by_css_selector('a.ProjectCardLink_link__2X36I.CommonProjectCard_image__1aEog')
 
+        # '이름' 저장
         try:
             name = p.find_element_by_css_selector('p.CommonProjectCard_title__28lHZ.RewardProjectCard_title__RDEBu').text
         except:
             name = 'no info'
 
+        # '카테고리' 저장
         try:
             category = p.find_element_by_css_selector('span.RewardProjectCard_category__1vo_V').text
         except:
             category = 'no info'
 
+        # '메이커' 저장
         try:
             maker = p.find_element_by_css_selector('span.RewardProjectCard_makerName__2sITk').text
         except:
             maker = 'no info'
 
+        # '달성률(%)' 저장
         try:
             percent = p.find_element_by_css_selector('span.RewardProjectCard_percent__edRT9').text.replace('%', '')
         except:
             percent = 'no info'
 
+        # '펀딩금액' 저장
         try:
             money = p.find_element_by_css_selector('span.RewardProjectCard_amount__2GV5X').text.replace(',', '')
         except:
@@ -328,8 +333,9 @@ def scrap_wadiz(config:Dict[Dict]) -> str:
 
 def scrap_navernews(config:Dict[Dict[str:str]]) -> str:
 
-    """[summary]
-    키워드(쿼리) 검색결과에 해당되는 네이버 뉴스 수집
+    """
+    [summary]
+        키워드(쿼리) 검색결과에 해당되는 네이버 뉴스 수집
 
     [Args]:
         config (Dict[Dict]): 뉴스기사 수집범위에 해당하는 시작일자, 종료일자, 키워드, 저장파일경로에 대한 key-value 가진 Dict
@@ -399,7 +405,8 @@ def scrap_navernews(config:Dict[Dict[str:str]]) -> str:
 
 def main(args:Dict) -> str:
 
-    """[summary]
+    """
+    [summary]
         목적에 따른 크롤링 함수 실행
 
     Args:
@@ -433,7 +440,7 @@ if __name__ == '__main__':
     
     # 실행 대상 함수 input
     parser = argparse.ArgumentParser()
-    parser.add_argument('--to_scrap', help="input 'wadiz' or 'navernews' or 'all'", type=str, default='wadiz')
+    parser.add_argument('-s', '--to_scrap', help="input 'wadiz' or 'navernews' or 'all'", type=str, default='wadiz')
     args = parser.parse_args()
 
     # 함수 실행

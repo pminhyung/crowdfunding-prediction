@@ -7,12 +7,13 @@ from selenium import webdriver
 def load_yaml(filename:str) -> Dict[Dict]:
     """
     [summary]
+    config.yaml 파일 load
 
     [Args]:
-        filename (str): [description]
+        filename (str): config 파일경로
 
     [Returns]:
-        Dict[Dict]: [description]
+        Dict[Dict]: key-value가 중첩된 dict 객체
     """
     with open(filename, 'r') as f:
         return yaml.load(f, Loader=yaml.FullLoader)

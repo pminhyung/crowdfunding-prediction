@@ -20,20 +20,69 @@
 - 머신러닝을 활용한 리워드형 프로젝트의 달성률 예측 모델 개발, 중요 변수 도출
 - 프로젝트 메이커들에게 가이드라인 제공하고, 서포터들에게는 성공할 프로젝트 선별을 통한 시간 및 비용 절약에 기여
 
-Usage
----
+## 3. Usage
 
-### 1. run 'train.py'
-- `scraping.py` : 와디즈 데이터 크롤링 수행
-- `readability.py` : 가독성 지수 생성
-- `derived_variables.py` : 파생변수 생성
-- `preprocessing.py` : 학습을 위한 데이터 전처리 수행
-- `xgb_train.py` : 데이터 수집부터 학습까지 전체 과정 수행 (학습모델 저장)
+### 3-0. `config.yaml` setting
+- SEED: 랜덤시드번호
+- WADIZ
+    - wadiz_id: wadiz 개인 ID
+    - wadiz_pw: wadiz 개인 pw
+    - wadiz_file_path: wadiz 파일 저장 경로 (상대경로)
+- NEWS
+  - start_date: 뉴스 수집 범위 시작일자
+  - end_date: 뉴스 수집 범위 종료일자
+  - news_keyword: 뉴스 검색 쿼리 (키워드)
+  - news_file_path: 뉴스 수집 파일 저장 경로 (상대경로)
+  - max_num: 뉴스기사 수집 최대 개수 
+
+- TRAIN
+  - save_model: 학습모델 저장여부
+  - wadiz_file_path: 수집된 와디즈 raw data 파일경로 
+  - test_size: 학습, 테스트 셋 split 시 사용할, 테스트 셋 사용 비율 (0과 1 사이)
+  - parent_dirname: 학습모델의 부모 디렉토리 경로
+  - model_file_name: 저장할 모델 파일 basename
+
+- HYPERPARAMETERS:
+  - n_estimators: 활용 트리 개수 (xgboost 학습 하이퍼파라미터)
+  - learning_rate: 학습률 (xgboost 학습 하이퍼파라미터)
+
+- TEST
+  - test_data_path: 테스트셋 파일 경로
+  - test_result_path: 테스트셋 예측 결과 파일 저장 경로
+
+### 3-1. Data Scraping
+- wadiz 데이터 수집
+```
+python scraping.py -s wadiz
+```
+- navernews 데이터 수집
+```
+python scraping.py -s navernews
+```
+- wadiz, navernews 데이터 모두 수집 
+```
+python scraping.py -s all
+```
   
-### 2. run 'test.py'
-- `test.py` : 테스트 데이터에 대해 예측 수행 (자장된 학습모델 사용)
-  
-### 3. Project Presentation
+### 3-2. Train
+```
+python train.py
+```
+- `train.py` : 데이터 수집, 전처리, 학습, 모델저장(optional) 수행
+
+### 3-3. Test
+```
+python test.py
+```
+- `test.py` : 학습 모델 load 후 테스트 데이터에 대한 전처리, 예측 수행
+
+## Updates
+- (22. 01. 15) docs issues #3, #4 : 코드별, 함수별 주석 추가, type hint 추가
+- (22. 01. 14) feat issues #2 : scraping.py에 argparse, config.yaml 활용을 통한 argument 파싱 기능 추가
+- (22. 01. 14) feat issues #1 : scraping.py 독립 실행 기능 추가
+- (21. 04. 08) 프로젝트 형태로 Refactoring
+
+## Project Presentation
 
 <img src = '/slides/slide1.PNG'>
 <img src = '/slides/slide2.PNG'>

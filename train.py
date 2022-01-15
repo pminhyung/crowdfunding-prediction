@@ -28,29 +28,19 @@ def train(config:Dict[Dict[str:str]]) -> None:
 
         config (Dict[Dict]): 시드, 학습 관련, 하이퍼파라미터 튜닝 관련 값 arguments 정의
 
-            - SEED : random seed로 사용되는 seed number
-
-            - TRAIN, save_model : 
-            - TRAIN, test_size : 
-            - TRAIN, parent_dirname : 
-            - TRAIN, model_file_name : 
-
-            - HYPERPARAMETERS, n_estimators :
-            - HYPERPARAMETERS, learning_rate :
-
     [Returns]:
         None
     """
 
     # config값 파싱
-    seed:int = config['SEED']
-    save_model:bool = config['TRAIN']['SAVE_MODEL']
-    parent_dirname:str = config['TRAIN']['parent_dirname']
-    model_file_name:str = config['TRAIN']['model_file_name']
-    test_size:float = config['TRAIN']['test_size']
-    n_estimators:list = config['HYPERPARAMETERS']['n_estimators']
-    learning_rate:list = config['HYPERPARAMETERS']['learning_rate']
-    wadiz_file_name:str = config['WADIZ']['wadiz_file_path']
+    seed:int = config['SEED']                                         # seed : 랜덤시드번호
+    save_model:bool = config['TRAIN']['SAVE_MODEL']                   # save_model : 학습모델 저장여부
+    parent_dirname:str = config['TRAIN']['parent_dirname']            # parent_dirname : 학습모델의 부모 디렉토리 경로
+    model_file_name:str = config['TRAIN']['model_file_name']          # model_file_nam : 저장할 학습모델의 basename
+    test_size:float = config['TRAIN']['test_size']                    # test_size : 학습, 테스트 셋 split 시 사용할, 테스트 셋 사용 비율 (0과 1 사이)
+    n_estimators:list = config['HYPERPARAMETERS']['n_estimators']     # n_estimators : 활용 트리 개수 (xgboost 학습 하이퍼파라미터)
+    learning_rate:list = config['HYPERPARAMETERS']['learning_rate']   # learning_rate : 학습률 (xgboost 학습 하이퍼파라미터)
+    wadiz_file_name:str = config['WADIZ']['wadiz_file_path']          # wadiz_file_name : 수집된 와디즈 raw data 파일경로
 
     # 크롤링 데이터 load
     wadiz = pd.read_excel(wadiz_file_name, engine = 'openpyxl')
@@ -61,10 +51,11 @@ def train(config:Dict[Dict[str:str]]) -> None:
     # Train/Validation set 분리
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=seed)
 
-    ## XGBoost Classifier 학습
+    # XGBoost Classifier 학습
     xgb_clf = XGBClassifier()
     xgb_clf.fit(X_train, y_train)
 
+    # XGBoost Accuracy 계산 및 출력
     xgb_acc = xgb_clf.score(X_test, y_test)
     print(xgb_acc)
 
@@ -75,6 +66,8 @@ def train(config:Dict[Dict[str:str]]) -> None:
     grid_xgb = GridSearchCV(xgb_clf, param_grid = xgb_params,
                 cv= 5, n_jobs=-1)
     grid_xgb.fit(X_train, y_train)
+
+    # GridSearchCV 결과 최적 score와 params 출력
     grid_score = grid_xgb.score(X_test,y_test)
     best_params = grid_xgb.best_params_
 
@@ -82,7 +75,7 @@ def train(config:Dict[Dict[str:str]]) -> None:
     print(grid_xgb)
     print(best_params)
 
-    # save model
+    # 최종 모델 저장
     if save_model:
 
         if not os.path.isdir(parent_dirname):
