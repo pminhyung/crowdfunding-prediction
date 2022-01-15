@@ -77,9 +77,9 @@ python test.py
 - `test.py` : 학습 모델 load 후 테스트 데이터에 대한 전처리, 예측 수행
 
 ## Updates
-- (22. 01. 15) docs issues #3, #4 : 코드별, 함수별 주석 추가, type hint 추가
-- (22. 01. 14) feat issues #2 : scraping.py에 argparse, config.yaml 활용을 통한 argument 파싱 기능 추가
-- (22. 01. 14) feat issues #1 : scraping.py 독립 실행 기능 추가
+- (22. 01. 15) docs issues #3, #6 (PR #7): 코드별, 함수별 주석 추가, type hint 추가
+- (22. 01. 14) feat issues #2 (PR #5): scraping.py에 argparse, config.yaml 활용을 통한 argument 파싱 기능 추가
+- (22. 01. 14) feat issues #1 (PR #4): scraping.py 독립 실행 기능 추가
 - (21. 04. 08) 프로젝트 형태로 Refactoring
 
 ## Project Presentation
