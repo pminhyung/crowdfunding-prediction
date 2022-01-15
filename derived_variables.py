@@ -3,7 +3,25 @@ import pandas as pd
 
 from readability import get_readability
 
-def gen_variables(data):
+def gen_variables(data: pd.DataFrame) -> pd.DataFrame:
+
+    """
+    [summary]
+        새로운 파생 변수 생성
+            - 프로젝트 관련 : 펀딩성공여부, 앵콜펀딩여부
+            - 메이커 관련 : 인스타존재여부, 인스타팔로워수
+            - 날짜 관련 : 펀딩시작날짜, 펀딩마감날짜, 마감배송차이, 펀딩기간, 펀딩시작요일
+            - 텍스트 관련 : 일펀딩금액, 일글수, 문장당강조, 문장당밑줄, 가독성
+            - 이미지, 영상 관련 : 시각화지수
+            - 달성률 : 타겟(달성률 binning)
+
+    [Args]:
+        data (pd.DataFrame): 데이터프레임 형식의 wadiz 수집 결과 파일 (raw data)
+
+    [Returns]:
+        pd.DataFrame: 데이터프레임 형식의 파생변수 생성 후의 wadiz 데이터
+    """
+    
     # 5개 필요변수 추가
     fund_amt = []  # 목표금액
     start_dt = []  # 펀딩시작날짜
@@ -34,6 +52,7 @@ def gen_variables(data):
         result = twoDatetime - oneDatetime
         fin_dlv_term.append(result.days)
 
+    # dataframe에 추가
     data['목표금액'] = fund_amt
     data['펀딩시작날짜'] = start_dt
     data['펀딩마감날짜'] = fin_dt
@@ -67,19 +86,8 @@ def gen_variables(data):
     # 시각화 지수
     data['시각화지수'] = data.좋아요수 + (data.이미지수 * 10) + (100 - data.비디오수 * 10)
 
-    def bin_target(x):
-        if x < 100:
-            return 0
-        elif x < 700:
-            return 1
-        else:
-            return 2
-
     # 가독성 지수
     data['가독성'] = get_readability(data)
-
-    # 명목형 달성률 생성
-    data['타겟'] = data['달성률'].apply(bin_target)
 
     return data
 
